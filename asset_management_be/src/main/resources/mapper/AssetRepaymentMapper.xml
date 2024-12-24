@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.asset_management.dao.AssetRepaymentMapper">
+    <select id="getAssetRMByCondition" resultType="java.util.Map">
+        SELECT ar.BORROWED_CODE,asset.ASSET_CODE,asset.ASSET_NAME ,ac.CLASS_NAME,ar.LOAN_DATE,se.SECTION_NAME,ar.CAUSE,BACK_DATE FROM asset_repayment ar
+            JOIN asset ON ar.ASSET_ID = asset.ASSET_ID
+            JOIN asset_class ac ON asset.CLASS_ID = ac.CLASS_ID
+            JOIN section se ON ar.SECTION_ID = se.SECTION_ID
+        <where>
+            <if test="assetCode != null and assetCode != ''">
+                AND asset.ASSET_CODE = #{assetCode}
+            </if>
+            <if test="assetId != null and assetId != ''">
+                AND asset.ASSET_ID = #{assetId}
+            </if>
+            <if test="classId != null">
+                AND ar.CLASS_ID = #{classId}
+            </if>
+            <if test="sectionId != null">
+                AND ar.SECTION_ID = #{sectionId}
+            </if>
+        </where>
+    </select>
+</mapper>

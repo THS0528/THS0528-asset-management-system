@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.asset_management.dao.LocationMapper">
+    <select id="getLocationByCondition" resultType="java.util.HashMap">
+        SELECT * FROM location
+        <where>
+            <if test="locationName != null and locationName != ''">
+                AND LOCATION_NAME = #{locationName}
+            </if>
+            <if test="locationType != null and locationType != ''">
+                AND LOCATION_TYPE = #{locationType}
+            </if>
+            <if test="locationInstructions != null and locationInstructions != ''">
+                AND LOCATION_INSTRUCTIONS = #{locationInstructions}
+            </if>
+            <if test="status != null">
+                AND STATUS = #{status}
+            </if>
+        </where>
+    </select>
+
+</mapper>

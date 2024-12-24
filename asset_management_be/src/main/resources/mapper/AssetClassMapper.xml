@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.asset_management.dao.AssetClassMapper">
+    <select id="getAssetClassByCondition" resultType="java.util.HashMap">
+        SELECT CLASS_ID,CLASS_CODE,CLASS_NAME,STATUS FROM asset_class
+        <where>
+        <if test="classCode != null and classCode != ''">
+           AND CLASS_CODE = #{classCode}
+        </if>
+        <if test="className != null and className != ''">
+            AND CLASS_NAME = #{className}
+        </if>
+        <if test="status != null">
+            AND STATUS = #{status}
+        </if>
+        </where>
+    </select>
+</mapper>
+

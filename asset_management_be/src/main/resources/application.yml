@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: asset_management
+  datasource:
+    username: root
+    password: Ths&20030528
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/asset_management?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC
+server:
+  port: 8080
+  servlet:
+    context-path: /asset_management
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    jdbc-type-for-null: NULL
+    map-underscore-to-camel-case: true
+    database-id: mysql
+  mapper-locations: classpath:mapper/*.xml
+
+logging:
+  level:
+    root: INFO  # 设置根日志级别为 INFO
+    com.example.asset_management: DEBUG  # 设置特定包的日志级别为 DEBUG
+  file:
+    name: logs/asset_management.log  # 指定日志文件路径
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"  # 控制台日志格式
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"  # 文件日志格式

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.asset_management.dao.SupplierMapper">
+    <select id="getSupplierByCondition" resultType="java.util.HashMap">
+        SELECT * FROM supplier
+        <where>
+            <if test="supplierName != null and supplierName != ''">
+                AND SUPPLIER_NAME = #{supplierName}
+            </if>
+            <if test="supplierType != null and supplierType != ''">
+                AND SECTION_NAME = #{supplierType}
+            </if>
+            <if test="linkman != null and linkman != ''">
+                 AND LINKMAN = #{linkman}
+            </if>
+            <if test="mp_number != null and mp_number != ''">
+                AND MP_NUMBER = #{mp_number}
+            </if>
+            <if test="location != null and location != '">
+                AND LOCATION = #{location}
+            </if>
+            <if test="status != null">
+                AND STATUS = #{status}
+            </if>
+        </where>
+    </select>
+</mapper>

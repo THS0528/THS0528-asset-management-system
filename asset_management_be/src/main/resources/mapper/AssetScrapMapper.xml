@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.asset_management.dao.AssetScrapMapper">
+    <select id="getAssetScrapByCondition" resultType="java.util.Map">
+        SELECT scrap.ID,scrap.ASSET_ID,asset.ASSET_CODE,asset.ASSET_NAME,sm.SCRAP_NAME,scrap.DATE,scrap.CAUSE,scrap.APPLICANT,scrap.RESULT FROM asset_scrap scrap
+            JOIN asset ON scrap.ASSET_ID = asset.ASSET_ID
+            JOIN scrap_mode sm ON scrap.SCRAP_ID = sm.SCRAP_ID
+        <where>
+            <if test="assetCode != null and assetCode != ''">
+                AND asset.ASSET_CODE = #{assetCode}
+            </if>
+            <if test="assetName != null and assetName != ''">
+                AND asset.ASSET_NAME = #{assetName}
+            </if>
+            <if test="scrapId != null and scrapId != ''">
+                AND sm.SCRAP_ID = #{scrapId}
+            </if>
+            <if test="dateStart != null and dateStart != '' and dateEnd != null and dateEnd != ''">
+                AND scrap.DATE BETWEEN #{dateStart} and #{dateEnd}
+            </if>
+            <if test="result != null and result != ''">
+                AND scrap.RESULT = #{result}
+            </if>
+        </where>
+    </select>
+</mapper>

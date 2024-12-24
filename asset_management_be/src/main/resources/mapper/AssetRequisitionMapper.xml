@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.asset_management.dao.AssetRequisitionMapper">
+    <select id="getAssetRTByCondition" resultType="java.util.Map">
+        SELECT ar.id,ar.ASSET_NAME,ac.CLASS_NAME,br.BRAND_NAME,su.SUPPLIER_NAME,ar.ARGUMENT,ar.APPLICANT,ar.BUDGET,ar.RESULT FROM asset_requisition ar
+            JOIN asset_class ac ON ar.CLASS_ID = ac.CLASS_ID
+            JOIN SUPPLIER su ON ar.SUPPLIER_ID = su.SUPPLIER_ID
+            JOIN BRAND br ON ar.BRAND_ID = br.BRAND_ID
+        <where>
+            <if test="assetName != null and assetName != ''">
+                AND ar.ASSET_NAME = #{assetName}
+            </if>
+            <if test="className != null and className != ''">
+                AND ac.CLASS_NAME = #{className}
+            </if>
+            <if test="supplierName != null and supplierName">
+                AND su.SUPPLIER_NAME = #{supplierName}
+            </if>
+            <if test="brandName != null and brandName != ''">
+                AND br.BRAND_NAME = #{brandName}
+            </if>
+            <if test="argument != null and argument != ''">
+                AND ar.ARGUMENT = #{argument}
+            </if>
+            <if test="budgetStart != null and budgetStart != '' and budgetEnd != null and budgetEnd != ''">
+                AND ar.BUDGET BETWEEN #{budgetStart} AND #{budgetEnd}
+            </if>
+            <if test="result != null and result != ''">
+                AND ar.RESULT = #{result}
+            </if>
+        </where>
+    </select>
+</mapper>

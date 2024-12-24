@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.asset_management.dao.AssetMapper">
+    <select id="getAssetByCondition" resultType="java.util.HashMap">
+        SELECT asset.ASSET_ID,asset.ASSET_CODE,asset.ASSET_NAME,ac.CLASS_NAME,su.SUPPLIER_NAME,br.BRAND_NAME,lo.LOCATION_NAME,asset.DATE,asset.STATUS FROM asset
+        JOIN asset_class ac ON asset.CLASS_ID = ac.CLASS_ID
+        JOIN supplier su ON asset.SUPPLIER_ID = su.SUPPLIER_ID
+        JOIN brand br ON asset.BRAND_ID= br.BRAND_ID
+        JOIN LOCATION lo ON asset.LOCATION_ID = lo.LOCATION_ID
+        <where>
+            <if test="assetCode != null and assetCode != ''">
+                AND asset.ASSET_CODE = #{assetCode}
+            </if>
+            <if test="assetName != null and assetName != ''">
+                AND asset.ASSET_NAME = #{assetName}
+            </if>
+            <if test="classId != null">
+                AND asset.CLASS_ID = #{classId}
+            </if>
+            <if test="supplierId != null">
+                AND asset.SUPPLIER_ID = #{supplierId}
+            </if>
+            <if test="brandId != null">
+                AND asset.BRAND_ID = #{brandId}
+            </if>
+            <if test="locationId != null">
+                AND asset.LOCATION_ID = #{locationId}
+            </if>
+            <if test="status != null">
+                AND asset.STATUS = #{status}
+            </if>
+        </where>
+    </select>
+</mapper>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.asset_management.dao.ScrapModeMapper">
+    <select id="getScrapModeByCondition" resultType="java.util.HashMap">
+        SELECT * FROM scrap_mode
+        <where>
+            <if test="scrapModeCode != null and scrapModeCode != ''">
+                AND SCRAPMODE_CODE = #{scrapModeCode}
+            </if>
+            <if test="scrapModeName != null and ScrapModeName != ''">
+                AND SCRAPMODE_NAME = #{scrapModeName}
+            </if>
+            <if test="status != null">
+                AND STATUS = #{status}
+            </if>
+        </where>
+    </select>
+</mapper>
