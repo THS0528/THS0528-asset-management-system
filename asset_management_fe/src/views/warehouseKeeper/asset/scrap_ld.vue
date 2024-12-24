@@ -1,0 +1,326 @@
+<script lang="ts" setup>
+import {reactive, ref} from 'vue'
+import axios from "axios";
+import router from "@/router";
+import index from "@/views/index.vue";
+import {ElNotification, FormInstance} from "element-plus";
+//表单隐藏属性绑定值
+const divFilter = ref(false)
+//显示筛选表单按钮绑定值
+const active_sw = ref(false)
+//显示筛选表单按钮点击事件
+const changeFilter = () => {
+  divFilter.value = !divFilter.value
+  if (pageSize.value === 10){
+    pageSize.value = 8
+  }else
+    pageSize.value = 10
+}
+//定义assetTypeForm接口，规范表单数据结构
+interface FormINF {
+  code: string,
+  name: string,
+  scrapMode:string
+  cause: string,
+  dateStart: string,
+  dateEnd: string,
+  result: string,
+}
+//定义formRef变量
+const formRef = ref<FormInstance>()
+/**
+ * reactive和ref的区别：
+ * reactive：创建的是一个响应式对象，可以用于存储和显示用户输入的数据。
+ * ref：创建的是一个响应式引用，用于存储异步处理结果、初始化数据等。
+ */
+const form = reactive<FormINF>({
+  code: '',
+  name: '',
+  scrapMode:'',
+  cause: '',
+  dateStart: '',
+  dateEnd: '',
+  result: '',
+})
+//定义状态选项
+const typeSelect = ref<any>([])
+//定义供应商选项
+const supplierSelect = ref<any>([])
+//定义品牌选项
+const brandSelect = ref<any>([])
+//提交表单
+const submitFrom =  (fromEL:FormInstance | undefined) => {
+  if (!fromEL) return
+  axios.get("/select/getAssetScrapByCondition",{
+    params:{
+      assetCode:form.code,
+      assetName:form.name,
+      scrapId:form.scrapMode,
+      cause:form.cause,
+      dateStart:form.dateStart,
+      dateEnd:form.dateEnd,
+      result:form.result,
+    }
+  })
+      .then(res => {
+        if (res.data.code === 1){
+          tableData.value = []
+          Notification("success","Success",res.data.msg)
+          for (let i = 0; i < res.data.assetScrap.length; i++) {
+            tableData.value[i] = {
+              assetName : res.data.assetScrap[i].ASSET_NAME,
+              date : res.data.assetScrap[i].DATE,
+              applicant : res.data.assetScrap[i].APPLICANT,
+              scrapMode : res.data.assetScrap[i].SCRAP_NAME,
+              assetCode : res.data.assetScrap[i].ASSET_CODE,
+              id : res.data.assetScrap[i].ID,
+              result : res.data.assetScrap[i].RESULT,
+              index : i + 1
+            }
+          }
+        }else {
+          Notification("error","Error",res.data.msg)
+        }
+      })
+
+
+}
+//重置(清空所有输入框 FromEl：form实例)
+const resetForm = (formEL: FormInstance | undefined) => {
+  if (!formEL) return
+  formEL.resetFields()
+}
+//日期选择框快捷选择
+const shortcuts = [
+  {
+    text: '今天',
+    value: new Date(),
+  },
+  {
+    text: '昨天',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24)
+      return date
+    },
+  },
+  {
+    text: '一周前',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+      return date
+    },
+  },
+]
+//日期选择框限制条件
+const disabledDate = (time: Date) => {
+  return time.getTime() > Date.now()
+}
+//表格数据
+const tableData=ref<any>([])
+//获取表格数据
+axios.get("/select/getAssetScrap")
+    .then(res => {
+      for (let i = 0; i < res.data.assetScrap.length; i++) {
+        tableData.value[i] = {
+          assetId : res.data.assetScrap[i].ASSET_ID,
+          assetName : res.data.assetScrap[i].ASSET_NAME,
+          date : res.data.assetScrap[i].DATE,
+          cause : res.data.assetScrap[i].CAUSE,
+          applicant : res.data.assetScrap[i].APPLICANT,
+          scrapMode : res.data.assetScrap[i].SCRAP_NAME,
+          assetCode : res.data.assetScrap[i].ASSET_CODE,
+          id : res.data.assetScrap[i].ID,
+          result : res.data.assetScrap[i].RESULT,
+          index : i + 1,
+          show : res.data.assetScrap[i].RESULT === "待审批"
+        }
+      }
+    })
+//每页数据量
+let pageSize = ref(10)
+//分页下表
+let currentPage = ref(1)
+const alterCurrentPage = (page :any) => {
+  currentPage.value = page
+}
+const handleDelete = (row: any) => {
+  axios.get("/delete/deleteAssetScrap",{
+    params: {
+      //参数
+      id : tableData.value[row.index-1].id,
+    }
+  }).then(res => {
+    //回调函数
+    if (res.data.code === 1){
+      Notification("success","Success",res.data.msg)
+      tableData.value.splice(row.index-1,1)
+    }else {
+      Notification("error","Error",res.data.msg)
+    }
+  })
+}
+//添加跳转
+const add = () => {
+  router.push({name:'资产报废表单',query: {title:'新增资产报废'}})
+}
+const resultSelect = [
+  {
+    label:'待审批',
+    value:'待审批'
+  },
+  {
+    label:'审批通过',
+    value:'审批通过'
+  },
+  {
+    label:'审批不通过',
+    value:'审批不通过'
+  }
+]
+// 定义函数Notification，用于显示通知消息
+const Notification = (type: string,title: string, msg: string) => {
+  ElNotification({
+    title: title,
+    message: msg,
+    type: type,
+    showClose: false,
+    position: 'bottom-right',
+  })
+}
+//表格操作事件
+const handlePass = (row: any) => {
+  axios.post("/update/updateAssetScrap",{
+    id : tableData.value[row.index-1].id,
+    result : '审批通过',
+    assetId : tableData.value[row.index-1].assetId
+  }).then(res => {
+    if (res.data.code === 1){
+      tableData.value[row.index-1].result = '审批通过'
+      Notification('success','Success',res.data.msg)
+    }else {
+      Notification('error','Error',res.data.msg)
+    }
+  })
+}
+const handleFail = (row: any) => {
+  axios.post("/update/updateAssetScrap",{
+    id : tableData.value[row.index-1].id,
+    result : '审批不通过',
+    assetId : tableData.value[row.index-1].assetId
+  }).then(res => {
+    if (res.data.code === 1){
+      tableData.value[row.index-1].result = '审批不通过'
+      Notification('success','Success','审批成功')
+    }else {
+      Notification('error','Error','审批失败')
+    }
+  })
+}
+</script>
+
+<template>
+  <el-container>
+    <el-header style="height: 30px">
+      <div style="display: flex; justify-content: space-between ;margin-top: 10px">
+        <!--  标题  -->
+        <el-text style="font-size: 20px "><el-icon color="#303133" ><management /></el-icon>资产类别管理</el-text>
+        <!--  按钮  -->
+        <div>
+          <el-switch v-model="active_sw" @click="changeFilter" inline-prompt inactive-text="筛选" active-text="筛选"/>
+          <el-divider direction="vertical" />
+          <el-button type="info" plain size="small" icon="plus" @click="add"></el-button>
+        </div>
+      </div>
+    </el-header>
+    <el-divider />
+    <el-main style="margin-top: -25px ;height: 72vh">
+      <div v-show="divFilter" >
+        <el-form :inline="true" ref="formRef" :model="form" class="demo-form-inline">
+          <el-form-item label="资产编号：">
+            <el-input v-model="form.code" placeholder="Asset type code" clearable />
+          </el-form-item>
+          <el-form-item label="资产名称：">
+            <el-input v-model="form.name" placeholder="Asset type name" clearable />
+          </el-form-item>
+          <el-form-item label="报废方式：">
+            <el-select v-model="form.scrapMode" placeholder="Supplier" clearable>
+              <el-option v-for="item in typeSelect" :value="item.value" :label="item.label"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="报废日期：">
+            <el-date-picker
+                v-model="form.dateStart"
+                type="date"
+                placeholder="Warehousing date"
+                :disabled-date="disabledDate"
+                :shortcuts="shortcuts"
+                style="width: 50px"
+            />—
+            <el-date-picker
+                v-model="form.dateEnd"
+                type="date"
+                placeholder="Warehousing date"
+                :disabled-date="disabledDate"
+                :shortcuts="shortcuts"
+                style="width: 50px"
+            />
+          </el-form-item>
+          <el-form-item label="审批结果：">
+            <el-select v-model="form.result" placeholder="Supplier" clearable>
+              <el-option v-for="item in resultSelect" :value="item.value" :label="item.label"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="
+
+            submitFrom(formRef)">查询</el-button>
+            <el-button @click="resetForm(formRef)">重置</el-button>
+          </el-form-item>
+        </el-form>
+        <el-divider />
+      </div>
+      <el-table :data="tableData.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
+                style="width: 100%;"
+      >
+        <el-table-column prop="index" type="index" width="50"  />
+        <el-table-column prop="assetCode" label="资产编码"  />
+        <el-table-column prop="assetName" label="资产名称"  />
+        <el-table-column prop="scrapMode" label="报废方式"  />
+        <el-table-column prop="date" label="报废日期"  />
+        <el-table-column prop="cause" label="报废原因"  />
+        <el-table-column prop="applicant" label="提交人"  />
+        <el-table-column prop="result" label="审批结果" />
+        <el-table-column label="操作">
+          <template #default="scope">
+            <el-button icon="Select" color="#00ff00" circle @click="handlePass(scope.row)" v-show="scope.row.show"/>
+            <el-divider direction="vertical" v-show="scope.row.show"/>
+            <el-button icon="CloseBold" color="#e30022" circle @click="handleFail(scope.row)" v-show="scope.row.show"/>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-main>
+    <el-footer>
+      <div class="example-pagination-block">
+        <el-pagination
+            layout="prev, pager, next"
+            @current-change="alterCurrentPage"
+            :current-page="currentPage"
+            :page-size="pageSize"
+            :total="tableData.length" />
+      </div>
+    </el-footer>
+  </el-container>
+</template>
+
+<style>
+.demo-form-inline .el-input {
+  --el-input-width: 150px;
+}
+
+.demo-form-inline .el-select {
+  --el-select-width: 150px;
+}
+
+</style>
